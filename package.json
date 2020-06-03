@@ -1,0 +1,31 @@
+{
+  "name": "dev-tips",
+  "version": "1.0.0",
+  "description": "",
+  "main": "App.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node Build/App.js",
+    "test": "npm run build && node -r dotenv/config && node Build/App.js"
+  },
+  "author": "henriquelborges",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "4.17.6",
+    "@types/mongoose": "5.7.21",
+    "@types/winston": "2.4.4",
+    "dotenv": "8.2.0",
+    "typescript": "3.9.3"
+  },
+  "dependencies": {
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/mongodb": "^3.5.20",
+    "@types/uuid": "^8.0.0",
+    "express": "4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.5.8",
+    "mongoose": "5.9.16",
+    "uuid": "^8.1.0",
+    "winston": "3.2.1"
+  }
+}

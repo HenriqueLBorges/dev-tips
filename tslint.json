@@ -1,0 +1,27 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "no-console": {
+            "severity": "none"
+        },
+        "member-ordering": [
+            true,
+            {
+                "order": [
+                    "public-static-field",
+                    "protected-static-field",
+                    "private-static-field",
+
+                    "public-constructor",
+                    "protected-constructor",
+                    "private-constructor"
+                ]
+            }
+        ]
+    },
+    "rulesDirectory": []
+}
