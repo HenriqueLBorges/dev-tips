@@ -95,7 +95,7 @@ export default class MongoAdapter implements IMongoPort {
 
     public async connect(): Promise<void> {
         try {
-            this.logInfo("Connecting...");
+            this.logInfo("Connecting... on " + `mongodb://${this.auth()}${this.host}:${this.port}/${this.dbName}`);
             if (!this.isConnected()) {
                 const url = `mongodb://${this.auth()}${this.host}:${this.port}/${this.dbName}`;
                 await this.instance.connect(url,

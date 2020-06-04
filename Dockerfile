@@ -1,15 +1,15 @@
-FROM node:8.15.0-alpine
+FROM node:12.4.0-alpine
+WORKDIR /server
 
-# Create Directory for the Container
-WORKDIR /usr/src/app
-# Only copy the package.json file to work directory
-COPY package.json .
-# Install all Packages
+COPY . /server
+RUN apk add git python make
 RUN npm install
-# Copy all other source code to work directory
-ADD . /usr/src/app
-# TypeScript
-RUN npm start
-# Start
-CMD [ "npm", "start" ]
+
+#SET TIME ZONE
+ENV TZ=America/Sao_Paulo
+RUN apk update && apk upgrade && \
+  apk add --update tzdata
+RUN rm -rf /var/cache/apk/*
+
 EXPOSE 3030
+CMD [ "npm", "start" ]

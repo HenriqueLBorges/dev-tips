@@ -9,12 +9,12 @@ class Tips {
 
     constructor() {
         const dbName: string = process.env.dbName ? process.env.dbName : "dev-tips";
-        const collection: string = process.env.collection ? process.env.collection : "tips";
-        const host: string = process.env.host ? process.env.host : "localhost";
-        const port: string = process.env.port ? process.env.port : "27017";
-        const user: string = process.env.user ? process.env.user : "admin";
-        const password: string = process.env.password ? process.env.password : "admin";
-        this.db = new MongoAdapter(dbName, collection, host, port, user, password);
+        const tipsCollection: string = process.env.tipsCollection ? process.env.tipsCollection : "tips";
+        const dbHost: string = process.env.dbHost ? process.env.dbHost : "localhost";
+        const port: string = process.env.dbPort ? process.env.dbPort : "27017";
+        const user: string = process.env.dbUser ? process.env.dbUser : "admin";
+        const password: string = process.env.dbPassword ? process.env.dbPassword : "admin";
+        this.db = new MongoAdapter(dbName, tipsCollection, dbHost, port, user, password);
         this.db.connect();
     }
 

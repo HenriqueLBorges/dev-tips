@@ -20,9 +20,15 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: admin
   
-  #dev-tips:
-  #  image: dev-tips
-  #  container_name: dev-tips
-  #  build: .
-  #  ports:
-  #    - 3030:3030
+  dev-tips:
+    build: ./
+    image: dev-tips
+    container_name: dev-tips
+    ports:
+      - 3030:3030
+    environment:
+      dbName: dev-tips
+      dbHost: mongo
+      dbPort: 27017
+      dbUser: admin
+      dbPassword: admin
