@@ -12,32 +12,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose = require("mongoose");
+const mongoose_1 = __importDefault(require("mongoose"));
 const Logger_1 = __importDefault(require("../../utils/Logger"));
 const ConnectorConnectError_1 = __importDefault(require("./ConnectorConnectError"));
 const ConnectorSaveError_1 = __importDefault(require("./ConnectorSaveError"));
 class MongoAdapter {
-    constructor(dbName, host, port, user, password) {
-        this.instance = new mongoose.Mongoose();
-        this.model = mongoose.Model;
+    constructor(dbName, collection, host, port, user, password) {
+        this.instance = new mongoose_1.default.Mongoose();
+        this.model = mongoose_1.default.Model;
         this.connected = false;
         this.dbName = dbName;
+        this.collection = collection;
         this.host = host;
         this.port = port;
         this.user = user;
         this.password = password;
+        const schema = new this.instance.Schema({}, { strict: false });
+        this.model = this.instance.model(this.collection, schema);
         this.registerEvents();
     }
-    save(document, collection) {
+    save(document) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (!this.connect) {
                     this.connect();
                 }
-                const Model = this.getMongooseModel(document, collection);
-                const item = new Model(document);
+                const item = new this.model(document);
                 yield item.save();
                 this.logInfo(`Saved document`);
+                return item;
             }
             catch (error) {
                 const message = `Error while saving document. Error = ${error}`;
@@ -46,13 +49,44 @@ class MongoAdapter {
             }
         });
     }
-    get(query, schema, collection) {
+    get(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const Model = this.getMongooseModel(schema, collection);
             if (!this.connect) {
                 this.connect();
             }
-            return yield Model.findOne(query);
+            return yield this.model.findOne(query);
+        });
+    }
+    getMultiple(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.connect) {
+                this.connect();
+            }
+            return yield this.model.find(query);
+        });
+    }
+    getByID(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.connect) {
+                this.connect();
+            }
+            return yield this.model.findById(id).lean();
+        });
+    }
+    update(id, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.connect) {
+                this.connect();
+            }
+            return yield this.model.findByIdAndUpdate(id, data);
+        });
+    }
+    remove(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.connect) {
+                this.connect();
+            }
+            return yield this.model.findByIdAndDelete(id);
         });
     }
     isConnected() {
@@ -117,10 +151,6 @@ class MongoAdapter {
             return `${this.user}:${this.password}@`;
         }
         return "";
-    }
-    getMongooseModel(schema, collection) {
-        const mongooseSchema = new this.instance.Schema(schema, { strict: false });
-        return this.instance.model(collection, mongooseSchema);
     }
 }
 exports.default = MongoAdapter;

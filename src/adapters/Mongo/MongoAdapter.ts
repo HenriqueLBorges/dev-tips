@@ -1,4 +1,4 @@
-import mongoose = require("mongoose");
+import mongoose, { Schema } from "mongoose";
 import IMongoPort from "../../ports/IMongoPort";
 import Logger from "../../utils/Logger";
 import ConnectorConnectError from "./ConnectorConnectError";
@@ -8,6 +8,7 @@ import ConnectorSaveError from "./ConnectorSaveError";
 export default class MongoAdapter implements IMongoPort {
 
     private dbName: string;
+    private collection: string;
     private host: string;
     private port: string;
     private user: string;
@@ -16,25 +17,28 @@ export default class MongoAdapter implements IMongoPort {
     private model = mongoose.Model;
     private connected: boolean = false;
 
-    constructor(dbName: string, host: string,
+    constructor(dbName: string, collection: string, host: string,
                 port: string, user: string, password: string) {
         this.dbName = dbName;
+        this.collection = collection;
         this.host = host;
         this.port = port;
         this.user = user;
         this.password = password;
+        const schema = new this.instance.Schema({}, { strict: false });
+        this.model = this.instance.model(this.collection, schema);
         this.registerEvents();
     }
 
-    public async save(document: any, collection: string): Promise<void> {
+    public async save(document: any): Promise<any> {
         try {
             if (!this.connect) {
                 this.connect();
             }
-            const Model = this.getMongooseModel(document, collection);
-            const item = new Model(document);
+            const item = new this.model(document);
             await item.save();
             this.logInfo(`Saved document`);
+            return item;
         } catch (error) {
             const message = `Error while saving document. Error = ${error}`;
             this.logError(message);
@@ -42,13 +46,47 @@ export default class MongoAdapter implements IMongoPort {
         }
     }
 
-    public async get(query: JSON, schema: any, collection: string): Promise<any> {
-        const Model = this.getMongooseModel(schema, collection);
+    public async get(query: JSON): Promise<any> {
 
         if (!this.connect) {
             this.connect();
         }
-        return await Model.findOne(query);
+
+        return await this.model.findOne(query);
+    }
+
+    public async getMultiple(query: JSON): Promise<any> {
+
+        if (!this.connect) {
+            this.connect();
+        }
+
+        return await this.model.find(query);
+    }
+
+    public async getByID(id: string): Promise<any> {
+
+        if (!this.connect) {
+            this.connect();
+        }
+
+        return await this.model.findById(id).lean();
+    }
+
+    public async update(id: string, data: any): Promise<any> {
+
+        if (!this.connect) {
+            this.connect();
+        }
+        return await this.model.findByIdAndUpdate(id, data);
+    }
+
+    public async remove(id: string): Promise<any> {
+
+        if (!this.connect) {
+            this.connect();
+        }
+        return await this.model.findByIdAndDelete(id);
     }
 
     public isConnected(): boolean {
@@ -115,8 +153,4 @@ export default class MongoAdapter implements IMongoPort {
         return "";
     }
 
-    private getMongooseModel(schema: any, collection: string): mongoose.Model<any> {
-        const mongooseSchema = new this.instance.Schema(schema, { strict: false });
-        return this.instance.model(collection, mongooseSchema);
-    }
 }

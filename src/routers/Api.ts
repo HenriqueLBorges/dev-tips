@@ -12,12 +12,11 @@ router.get("/tip",
     (req: express.Request, res: express.Response, next: express.NextFunction) => {
         const hasPassedID = !!req.query.tipID;
         if (hasPassedID) {
-            const id = req.query.tipID as string;
-            const response = ApiController.getTip(id, res);
+            const response = ApiController.getTip(req, res);
             log(req.method, req.route.path, res.statusCode);
             return response;
         } else {
-            const response = ApiController.getTips(res);
+            const response = ApiController.getTips(req, res);
             log(req.method, req.route.path, res.statusCode);
             return response;
         }
@@ -25,12 +24,22 @@ router.get("/tip",
 
 router.post("/tip",
     (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        const hasToken = !!req.params.token;
-        const token = hasToken ? req.params.token as string : "";
-        if (Authentication.validateToken(token)) {
-            const response = res.json("created");
-            log(req.method, req.route.path, res.statusCode);
-            return response;
+        const hasToken = !!req.headers.authorization;
+        const token = hasToken ? (req.headers.authorization as string).split(" ")[1] as string : "";
+        const user = Authentication.validateToken(token);
+        if (user !== null) {
+            const hasAllKeys = req.body.title && req.body.body;
+
+            if (hasAllKeys) {
+                const response = ApiController.postTip(req, res, user.username);
+                log(req.method, req.route.path, res.statusCode);
+                return response;
+            } else {
+                const response = res.json("Missing params");
+                log(req.method, req.route.path, res.statusCode);
+                return response;
+            }
+
         } else {
             const response = res.status(400).json("Not authenticated");
             log(req.method, req.route.path, res.statusCode);
@@ -40,26 +49,73 @@ router.post("/tip",
 
 router.put("/tip",
     (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        res.sendStatus(200);
+        const hasToken = !!req.headers.authorization;
+        const token = hasToken ? (req.headers.authorization as string).split(" ")[1] as string : "";
+        const user = Authentication.validateToken(token);
+        if (user !== null) {
+            const hasKeys = req.query.tipID && (req.body.title || req.body.body);
+
+            if (hasKeys) {
+                const response = ApiController.updateTip(req, res, user.username);
+                log(req.method, req.route.path, res.statusCode);
+                return response;
+            } else {
+                const response = res.json("Missing params");
+                log(req.method, req.route.path, res.statusCode);
+                return response;
+            }
+
+        } else {
+            const response = res.status(400).json("Not authenticated");
+            log(req.method, req.route.path, res.statusCode);
+            return response;
+        }
     });
 
 router.delete("/tip",
-    (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        res.sendStatus(200);
-    });
+(req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const hasToken = !!req.headers.authorization;
+    const token = hasToken ? (req.headers.authorization as string).split(" ")[1] as string : "";
+    const user = Authentication.validateToken(token);
+    if (user !== null) {
+        const response = ApiController.deleteTip(req, res, user.username);
+        log(req.method, req.route.path, res.statusCode);
+        return response;
+    } else {
+        const response = res.status(400).json("Not authenticated");
+        log(req.method, req.route.path, res.statusCode);
+        return response;
+    }
+});
 
-router.post("/login",
+router.post("/user",
     async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         const hasAllKeys = req.body && req.body.firstName
             && req.body.lastName && req.body.username && req.body.password;
 
         if (hasAllKeys) {
-            const result = await Authentication.createUser(
-                req.body.firstName, req.body.lastName, req.body.username, req.body.password);
-            const message = result !== null ? "User created" : "User not created";
-            res.json(message);
+            const response = ApiController.createUser(req, res);
+            log(req.method, req.route.path, res.statusCode);
+            return response;
         } else {
-            res.json("Missing params");
+            const response = res.json("Missing params");
+            log(req.method, req.route.path, res.statusCode);
+            return response;
+        }
+    });
+
+router.post("/authenticate",
+    async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        const hasAllKeys = req.body.username && req.body.password;
+
+        if (hasAllKeys) {
+            const response = ApiController.authenticate(req, res);
+            log(req.method, req.route.path, res.statusCode);
+            return response;
+        } else {
+            const response = res.json("Missing params");
+            log(req.method, req.route.path, res.statusCode);
+            return response;
         }
     });
 

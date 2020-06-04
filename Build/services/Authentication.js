@@ -19,36 +19,38 @@ const Logger_1 = __importDefault(require("../utils/Logger"));
 class Authentication {
     constructor() {
         this.secret = process.env.secret ? process.env.secret : "secret";
-        const dbName = process.env.dbName ? process.env.dbName : "test";
+        const dbName = process.env.dbName ? process.env.dbName : "dev-tips";
+        const collection = process.env.collection ? process.env.collection : "users";
         const host = process.env.host ? process.env.host : "localhost";
         const port = process.env.port ? process.env.port : "27017";
-        const user = process.env.user ? process.env.user : "";
-        const password = process.env.password ? process.env.password : "";
-        this.db = new MongoAdapter_1.default(dbName, host, port, user, password);
+        const user = process.env.user ? process.env.user : "admin";
+        const password = process.env.password ? process.env.password : "admin";
+        this.db = new MongoAdapter_1.default(dbName, collection, host, port, user, password);
         this.db.connect();
     }
     validateToken(token) {
         try {
-            jwt.verify(token, this.secret);
+            const user = jwt.verify(token, this.secret);
             Logger_1.default.info("Validated token.");
-            return true;
+            return user;
         }
         catch (err) {
-            Logger_1.default.info("Error while validating token.");
-            return false;
+            Logger_1.default.info(`Error while validating token ${token}.`);
+            return null;
         }
     }
     createUser(firstName, lastName, username, password) {
         return __awaiter(this, void 0, void 0, function* () {
-            const query = { username, password };
-            const userInDB = null; // await this.db.get(query, UsersModel);
-            Logger_1.default.info("Created user");
+            const query = { username };
+            const userInDB = yield this.db.get(query);
             if (userInDB === null) {
-                const user = { id: uuid_1.v4(), firstName, lastName, username, password, registeredAt: new Date() };
-                yield this.db.save(user, "users");
+                const user = { id: uuid_1.v4(), firstName, lastName, username, password, when: new Date() };
+                Logger_1.default.info(`User ${user.id} created`);
+                yield this.db.save(user);
                 return user;
             }
             else {
+                Logger_1.default.info("User not created");
                 return null;
             }
         });
@@ -57,15 +59,21 @@ class Authentication {
         return __awaiter(this, void 0, void 0, function* () {
             Logger_1.default.info("Authenticated user");
             const query = { username, password };
-            const user = yield this.db.get(query, 1, "users");
-            return this.generateToken(user.username);
+            const userInDB = yield this.db.get(query);
+            if (userInDB !== null) {
+                return this.generateToken(username);
+            }
+            else {
+                Logger_1.default.info("User not created");
+                return null;
+            }
         });
     }
     generateToken(data) {
         Logger_1.default.info("Generated token");
         return jwt.sign({
-            data,
             exp: Math.floor(Date.now() / 1000) + (60 * 60),
+            username: data,
         }, this.secret);
     }
 }
