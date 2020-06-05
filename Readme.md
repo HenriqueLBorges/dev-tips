@@ -9,7 +9,7 @@ I documented the API endpoints [here](https://app.swaggerhub.com/apis/HenriqueLB
 
 # Where is hosted?
 
-For this project I chosed AWS. You can interact with this API [here](http://35.155.99.106:3030).
+For this project I chosed AWS. You can interact with this API [here](http://35.155.99.106:3030/api/tip/).
 
 # What are the components present in this project?
 
