@@ -32,3 +32,8 @@ services:
       dbPort: 27017
       dbUser: admin
       dbPassword: admin
+    healthcheck:
+      test: "curl --fail -s dev-tips:3030/cat/health-check || exit 1"
+      interval: 1m
+      timeout: 5s
+      retries: 3

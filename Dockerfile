@@ -1,4 +1,9 @@
 FROM node:12.4.0-alpine
+
+RUN apk add --update \
+    curl \
+    && rm -rf /var/cache/apk/*
+
 WORKDIR /server
 
 COPY . /server
