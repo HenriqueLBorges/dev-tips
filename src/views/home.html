@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <link type="text/css" rel="stylesheet" href="css/personlized.css" media="screen,projection" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="./js/materialize.min.js"></script>
+    <script src="./js/materialize.js"></script>
+    <script src="./js/dateFormat.js"></script>
+    <script src="./js/jquery-dateformat.js"></script>
+    <script src="./js/jquery-dateFormat.min.js"></script>
+</head>
+
+<body>
+
+    <div class="row">
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo">DEV TIPS</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a href="criar_dica.html">Add Dica</a></li>
+                    <li><a onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="row">
+                <span id="content"></span>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        window.onload = checkUserAndGetData
+
+        function checkUserAndGetData() {
+            const username = localStorage.getItem("username")
+            const auth = localStorage.getItem("accessToken")
+            if (!username && !auth)
+                return location.href = "login.html"
+            return getData()
+        }
+
+
+        function getData() {
+            const token = localStorage.getItem("accessToken")
+            const settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://35.155.99.106:3030/api/tip/",
+                "method": "GET",
+                "headers": {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
+                    "Accept": "/",
+                    "Host": "35.155.99.106:3030",
+                    "Accept-Encoding": "gzip, deflate",
+                    "Connection": "keep-alive",
+                },
+                "processData": false,
+                "data": ""
+            }
+
+            let content = ``
+            let author = localStorage.getItem("username")
+            $.ajax(settings).done((response) => {
+                console.log(response);
+                if (response.length > 0) {
+                    response.forEach((elem) => {
+                        let ownPost = ``
+
+                        elem.from === author ?
+                            ownPost = `<button class="btn-large btn-flat icon-color-buttons" type="submit" name="action" value=${elem._id} onclick="deletePost(event)">
+                                        <i  onclick="deletePost(event)" value=${elem._id} class="large material-icons left">delete</i></button>
+                                       
+                                        <button  onclick="editPost(event)" value=${elem._id} class="btn-large btn-flat icon-color-buttons" type="submit" name="action">
+                                        <i value=${elem._id} class="large material-icons left">edit</i></button>` : `<span> </span>`
+
+
+                        content += `<div class="col s12 m6">
+                            <div class="card blue-grey darken-1" id=${elem.id}>
+                                <div class="card-content white-text">
+                                    <span class="card-title">
+                                        ${ownPost}
+                                        ${elem.title} 
+                                    </span>
+                                    <p>${elem.body}</p>
+                                </div>
+                                <div class="card-action">
+                                    <p class="text-lighten-5">Autor: ${elem.from}</p>
+                                    <span class="longDateFormat text-lighten-5">${jQuery.format.prettyDate(elem.when)}</span>
+                                </div>
+                            </div>
+                        </div>`
+                        document.getElementById('content').innerHTML = content;
+                    })
+                }
+            });
+        }
+
+        function deletePost(event) {
+            const token = localStorage.getItem("accessToken")
+
+            const settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://35.155.99.106:3030/api/tip?tipID=" + event.target.value,
+                "method": "DELETE",
+                "headers": {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
+                    "Accept": "/",
+                    "Host": "35.155.99.106:3030",
+                    "Accept-Encoding": "gzip, deflate",
+                    "Connection": "keep-alive",
+                },
+                "processData": false,
+                "data": ""
+            }
+
+            let content = ``
+            let author = localStorage.getItem("username")
+            $.ajax(settings).done((response) => {
+                console.log(response);
+                if (response) {
+                    M.toast({html: 'Post excluido!'})
+                    setTimeout(() => location.reload(), 2500)
+                    
+                }
+            });
+        }
+       
+        function editPost(event) {
+            localStorage.setItem('postToEdit', event.target.value)
+            location.href = "criar_dica.html"
+        }
+
+        function logout() {
+            localStorage.clear
+            location.href = "index.html"
+        }
+    </script>
+</body>

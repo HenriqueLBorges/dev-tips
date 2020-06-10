@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="./js/materialize.min.js"></script>
+    <script src="./js/materialize.js"></script>
+</head>
+
+<body>
+
+    <div class="row">
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo">DEV TIPS</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a href="home.html">Home</a></li>
+                    <li><a onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div class="container">
+
+        <form id="myForm" class="col s10">
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="titulo" type="text" class="validate">
+                    <label for="titulo" class="active">Titulo</label>
+                </div>
+                <div class="input-field col s12">
+                    <textarea id="dica" class="materialize-textarea"></textarea>
+                    <label for="dica" class="active">Dica</label>
+                </div>
+                <button class="btn waves-effect waves-light" onclick="sendForm(event)" type="submit">Adicionar
+                    <i class="material-icons right">add</i>
+                </button>
+
+            </div>
+
+            <div class="row">
+                <span id="msgSuccess"> </span>
+            </div>
+
+        </form>
+    </div>
+    <script>
+        // window.onbeforeunload = localStorage.removeItem("postToEdit")
+
+        function goodbye(e) {
+            if (!e) e = window.event;
+            //e.cancelBubble is supported by IE - this will kill the bubbling process.
+            e.cancelBubble = true;
+            e.returnValue = 'You sure you want to leave?'; //This is displayed on the dialog
+
+            //e.stopPropagation works in Firefox.
+            if (e.stopPropagation) {
+                e.stopPropagation();
+                e.preventDefault();
+                localStorage.removeItem("postToEdit")
+            }
+        }
+
+        window.onbeforeunload = goodbye;
+
+        var form = document.getElementById("myForm");
+        function handleForm(event) { event.preventDefault(); }
+        form.addEventListener('submit', handleForm);
+
+        function sendForm(event) {
+
+            event.preventDefault()
+            let titulo = document.getElementById("titulo").value
+            let dica = document.getElementById("dica").value
+            const token = localStorage.getItem("accessToken")
+            const postEdit = localStorage.getItem("postToEdit")
+
+            const httpVerb = postEdit ? "PUT" : "POST"
+            const URL = postEdit ? "http://35.155.99.106:3030/api/tip?tipID=" + postEdit : "http://35.155.99.106:3030/api/tip"
+
+            const settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": URL,
+                "method": httpVerb,
+                type: httpVerb,
+                "headers": {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
+                    "Accept": "/",
+                    "Host": "35.155.99.106:3030",
+                    "Accept-Encoding": "gzip, deflate",
+                    "Connection": "keep-alive",
+                },
+                "processData": false,
+                dataType: "json",
+                "data": JSON.stringify({ "title": titulo, "body": dica }),
+                error: function (xhr, status) {
+                    alert("Sessão expirada, efetue o login novamente!");
+                    location.href = "index.html"
+                    localStorage.clear
+                }
+            }
+
+            let msgDeSucesso = ``
+            $.ajax(settings).done((response) => {
+                console.log(response);
+                if (response) {
+                    document.getElementById("titulo").value = ""
+                    document.getElementById("dica").value = ""
+                    if (postEdit) {
+                        localStorage.removeItem("postToEdit")
+                    }
+                    M.toast({ html: `Dica ${postEdit ? "editado" : "criado"} com sucesso!!` })
+                }
+            });
+        }
+
+        function logout() {
+            localStorage.clear
+            location.href = "index.html"
+        }
+    </script>
+</body>

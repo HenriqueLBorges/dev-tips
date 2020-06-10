@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+
+    <div class="row">
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo">DEV TIPS</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a href="login.html">Login</a></li>
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div class="container">
+
+        <form id="myForm" class="col s10">
+            <div class="row">
+                <div class="input-field col s6">
+                    <input id="first_name" type="text" class="validate">
+                    <label class="active" for="first_name">First Name</label>
+                </div>
+                <div class="input-field col s6">
+                    <input id="last_name" type="text" class="validate">
+                    <label class="active" for="last_name">Last Name</label>
+                </div>
+                <div class="input-field col s6">
+                    <input id="username" type="text" class="validate">
+                    <label class="active" for="username">username</label>
+                </div>
+                <div class="input-field col s6">
+                    <input id="pass" type="password" class="validate">
+                    <label class="active" for="password">Password</label>
+                </div>
+
+                <button class="btn waves-effect waves-light" onclick="sendForm(event)" type="submit">Submit
+                    <i class="material-icons right">send</i>
+                </button>
+
+            </div>
+
+            <div class="row">
+
+            </div>
+
+        </form>
+    </div>
+    <script>
+
+        var form = document.getElementById("myForm");
+        function handleForm(event) { event.preventDefault(); }
+        form.addEventListener('submit', handleForm);
+
+        function sendForm(event) {
+
+            event.preventDefault()
+            let first_name = document.getElementById("first_name").value
+            let last_name = document.getElementById("last_name").value
+            let pass = document.getElementById("pass").value
+            let username = document.getElementById("username").value
+            const settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://35.155.99.106:3030/api/user",
+                "method": "POST",
+                type: "POST",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "processData": false,
+                dataType: "json",
+                "data": JSON.stringify({ "firstName": first_name, "lastName": last_name, "username": username, "password": pass }),
+                success: function (response) {
+                    console.log(response)
+                    alert(`Usuário: ${username} criado, redirecionando para o login`);
+                    setTimeout(() => location.href = 'login.html', 3500)
+                },
+                error: function (xhr, status) {
+                    alert("Tente novamente mais tarde");
+                    console.log("[xhr] ", xhr)
+                    console.log("[status] ", status)
+                }
+
+            }
+
+            $.ajax(settings).done((response) => {
+                console.log(response);
+
+            });
+        }
+    </script>
+</body>

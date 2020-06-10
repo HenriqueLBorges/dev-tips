@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+
+    <div class="row">
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo">DEV TIPS</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a href="cadastro.html">Cadastro</a></li>
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div class="container">
+
+        <form id="myForm" class="col s10">
+            <div class="row">
+                <div class="input-field col s6">
+                    <input id="username" type="text" class="validate">
+                    <label class="active" for="username">username</label>
+                </div>
+                <div class="input-field col s6">
+                    <input id="pass" type="password" class="validate">
+                    <label class="active" for="password">Password</label>
+                </div>
+
+                <button class="btn waves-effect waves-light" onclick="sendForm(event)" type="submit">Login
+                    <i class="material-icons right">send</i>
+                </button>
+
+            </div>
+
+            <div class="row">
+
+            </div>
+
+        </form>
+    </div>
+    <script>
+
+        var form = document.getElementById("myForm");
+        function handleForm(event) { event.preventDefault(); }
+        form.addEventListener('submit', handleForm);
+
+        function sendForm(event) {
+            event.preventDefault()
+            let pass = document.getElementById("pass").value
+            let username = document.getElementById("username").value
+
+            const settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://35.155.99.106:3030/api/authenticate",
+                "method": "POST",
+                type: "POST",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "processData": false,
+                dataType: "json",
+                "data": JSON.stringify({ "username": username, "password": pass }),
+                success: function (response) {
+                    if (response && response.token) {
+                        localStorage.setItem('accessToken', response.token);
+                        localStorage.setItem('username', username);
+                        location.href = 'home.html';
+                    }
+                },
+                error: function (xhr, status) {
+                    alert("Tente novamente mais tarde");
+                    console.log("[xhr] ", xhr)
+                    console.log("[status] ", status)
+                }
+
+            }
+
+
+
+            $.ajax(settings).done((response) => {
+                if (response && response.token && response.token != null) {
+                    localStorage.setItem('accessToken', response.token);
+                    localStorage.setItem('username', username);
+                    location.href = 'home.html';
+                    return
+                }
+
+                alert("usuário ou senha incorreta")
+            });
+        }
+    </script>
+</body>

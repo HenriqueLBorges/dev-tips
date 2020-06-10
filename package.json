@@ -5,8 +5,9 @@
   "main": "App.js",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node Build/App.js",
-    "test": "npm run build && node -r dotenv/config && node Build/App.js"
+    "copy": "cp -r src/views/ Build/",
+    "start": "npm run build && npm run copy && node Build/App.js",
+    "test": "npm run build && npm run copy && node -r dotenv/config && node Build/App.js"
   },
   "author": "henriquelborges",
   "license": "ISC",
@@ -17,11 +18,12 @@
     "@types/jsonwebtoken": "8.5.0",
     "@types/mongodb": "3.5.20",
     "@types/uuid": "8.0.0",
+    "@types/cors": "2.8.6",
     "dotenv": "8.2.0"
   },
   "dependencies": {
-    "@types/cors": "^2.8.6",
-    "cors": "^2.8.5",
+    "cors": "2.8.5",
+    "ejs": "3.1.3",
     "express": "4.17.1",
     "jsonwebtoken": "8.5.1",
     "mongodb": "3.5.8",
