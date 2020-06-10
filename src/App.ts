@@ -1,3 +1,4 @@
+import cors = require("cors");
 import express = require("express");
 import Logger from "./utils/Logger";
 
@@ -18,6 +19,7 @@ class App {
   }
 
   private config(): void {
+    this.app.use(cors());
     this.app.use(express.json());
     this.registerRouters();
   }
